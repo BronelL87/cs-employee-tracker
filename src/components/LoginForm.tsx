@@ -25,7 +25,7 @@ const LoginForm = () => {
     const changeUser = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUser({
             ...user,
-            [event.target.id]: '',
+            [event.target.id]: event.target.value.trim(),
         });
 
         if (loginError) {
@@ -137,7 +137,7 @@ const LoginForm = () => {
                 )}
             </Button>
             <div className="flex w-75">
-                <p>Don't have an account?</p>
+                <p>{"Don't have an account?"}</p>
                 <Link href="/create-account" className="ml-2 text-blue-700 hover:underline">
                     Create one here :&#41;
                 </Link>

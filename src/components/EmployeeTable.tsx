@@ -22,6 +22,11 @@ const EmployeeTable = () => {
     const [sortBy, setSortBy] = useState("");
     const [sortByJob, setSortByJob] = useState("");
 
+    // const disabledOption1 = sortByJob == ""
+    const disabledOption2 = sortByJob == "Customer Support"
+    const disabledOption3 = sortByJob == "IT Support Specialist"
+    const disabledOption4 = sortByJob == "Software Engineer"
+
     // Function to get employees
     const handleGetEmployees = async () => {
         try {
@@ -41,9 +46,9 @@ const EmployeeTable = () => {
     // Updating sort functions
     const changeSortBy = (value: string) => {
         if (value == "name" && sortBy == "name") {
-            setSortBy(`${value}-reverse`);
+            setSortBy(`${value}`);
         } else if (value == "hire-date" && sortBy == "hire-date") {
-            setSortBy(`${value}-reverse`);
+            setSortBy(`${value}`);
         } else {
             setSortBy(value);
         }
@@ -93,7 +98,7 @@ const EmployeeTable = () => {
 
     // Sorting the employees
     useEffect(() => {
-        const sortingEmployees = employees;
+        let sortingEmployees = [...employees];
 
         const handleSorting = () => {
             switch (sortBy) {
@@ -114,7 +119,7 @@ const EmployeeTable = () => {
                     );
                     break;
                 case "job-title":
-                    sortingEmployees.filter((employee: Employee) => employee.jobTitle == sortByJob);
+                    sortingEmployees = sortingEmployees.filter((employee: Employee) => employee.jobTitle == sortByJob);
                     break;
                 default:
                     sortingEmployees.sort((a: Employee, b: Employee) => a.id - b.id);
@@ -174,9 +179,9 @@ const EmployeeTable = () => {
                             <option value="" disabled>
                                 Job title
                             </option>
-                            <option value="Customer Support">Customer Support</option>
-                            <option value="IT Support Specialist">IT Support Specialist</option>
-                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Customer Support" disabled={disabledOption2}>Customer Support</option>
+                            <option value="IT Support Specialist" disabled={disabledOption3}>IT Support Specialist</option>
+                            <option value="Software Engineer" disabled={disabledOption4}>Software Engineer</option>
                         </select>
                     </div>
                 </div>

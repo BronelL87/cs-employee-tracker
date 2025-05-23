@@ -12,6 +12,7 @@ import { Calendar } from './ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 
 
 // Valid values for type: "Add" & "Edit"
@@ -24,14 +25,15 @@ const EmployeeModal = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
         name: "",
         jobTitle: "",
         hireDate: "",
+        details: "",
+        status: ""
     });
-
     const [token, setToken] = useState('');
 
     const disableBtn =
-        employeeToChange.name.trim() != "" ||
-        employeeToChange.jobTitle.trim() != "" &&
-        employeeToChange.hireDate != "";
+        employeeToChange.name.trim() == "" ||
+        employeeToChange.jobTitle.trim() == "" ||
+        employeeToChange.hireDate == "";
 
     // Modal Functions
     const onOpenModal = () => {
@@ -44,7 +46,7 @@ const EmployeeModal = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
 
     const onCloseModal = () => {
         setOpenModal(false);
-        setEmployeeToChange({ id: 0, name: "", jobTitle: "", hireDate: "" });
+        setEmployeeToChange({ id: 0, name: "", jobTitle: "", hireDate: "", details: "", status: "" });
     };
 
     // Change employee functions
@@ -53,6 +55,7 @@ const EmployeeModal = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
             ...employeeToChange,
             [e.target.id]: e.target.value,
         });
+
     };
 
     const handleEmployeeToChangeHireDate = (date: string) => {
@@ -103,6 +106,8 @@ const EmployeeModal = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
                 name: "",
                 jobTitle: "",
                 hireDate: "",
+                details: "",
+                status: ""
             });
         } catch (error) {
             console.log("error", error);
@@ -161,11 +166,31 @@ const EmployeeModal = ({ type, employee, refreshEmployees }: { type: 'Add' | 'Ed
                             <div className="mb-2 block">
                                 <Label htmlFor="jobTitle">Job title</Label>
                             </div>
-                            <Input
-                                id="jobTitle"
-                                value={employeeToChange.jobTitle}
-                                onChange={handleEmployeeToChange}
-                            />
+
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start">
+                            {employeeToChange.jobTitle || "Select a job title"}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onSelect={() =>
+                            setEmployeeToChange((prev) => ({ ...prev, jobTitle: "Customer Support" }))
+                            }>
+                            Customer Support
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() =>
+                            setEmployeeToChange((prev) => ({ ...prev, jobTitle: "IT Support Specialist" }))
+                            }>
+                            IT Support Specialist
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() =>
+                            setEmployeeToChange((prev) => ({ ...prev, jobTitle: "Software Engineer" }))
+                            }>
+                            Software Engineer
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
                         </div>
                     </div>
                     <div>

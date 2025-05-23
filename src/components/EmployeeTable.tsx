@@ -10,6 +10,14 @@ import { Button } from './ui/button';
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table';
 import EmployeeModal from './EmployeeModal';
 import { useAppContext } from '@/lib/context/context';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from './ui/pagination';
 
 const EmployeeTable = () => {
     const { push } = useRouter();
@@ -24,6 +32,14 @@ const EmployeeTable = () => {
 
     const [sortBy, setSortBy] = useState("");
     const [sortByJob, setSortByJob] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const employeesPerPage = 5;
+
+    const indexOfLastEmployee = currentPage * employeesPerPage;
+    const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+    const currentEmployees = sortedEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+
+    const totalPages = Math.ceil(sortedEmployees.length / employeesPerPage);
 
     // const disabledOption1 = sortByJob == ""
     const disabledOption2 = sortByJob == "Customer Support"
@@ -48,23 +64,17 @@ const EmployeeTable = () => {
 
     // Updating sort functions
     const changeSortBy = (value: string) => {
-        if (value == "name" && sortBy == "name") {
-            setSortBy(`${value}`);
-        } else if (value == "hire-date" && sortBy == "hire-date") {
-            setSortBy(`${value}`);
-        } else {
-            setSortBy(value);
-        }
+            setSortBy(value);    
 
         if (sortByJob) {
             setSortByJob("");
         }
     };
 
-    const changeSortByJob = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const changeSortByJob = (value: string) => {
         setSortBy("job-title");
 
-        setSortByJob(e.target.value);
+        setSortByJob(value);
     };
 
     // Delete employee
@@ -79,9 +89,7 @@ const EmployeeTable = () => {
     };
 
     const handleViewEmployee = async (id: number) => {
-        await setEmployeeId(id);
-
-        push('/employee-page');
+        push(`/employee-page/${id}`);
     };
 
     // Getting the user token from storage
@@ -180,18 +188,19 @@ const EmployeeTable = () => {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <select
-                            className="ml-3 text-sm border rounded p-1"
-                            value={sortBy === "job-title" ? sortByJob : ""}
-                            onChange={changeSortByJob}
-                        >
-                            <option value="" disabled>
-                                Job title
-                            </option>
-                            <option value="Customer Support" disabled={disabledOption2}>Customer Support</option>
-                            <option value="IT Support Specialist" disabled={disabledOption3}>IT Support Specialist</option>
-                            <option value="Software Engineer" disabled={disabledOption4}>Software Engineer</option>
-                        </select>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className='ml-3 text-sm border rounded p-1'>
+                                    Job title
+                                    {sortBy === "job-title" ? <FaCaretDown className="ml-2" /> : sortByJob === "" ? <FaCaretUp className="ml-2" /> : ""}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => changeSortByJob("Customer Support")}>Customer Support</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => changeSortByJob("IT Support Specialist")}>IT Support Specialist</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => changeSortByJob("Software Engineer")}>Software Engineer</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </div>
@@ -208,7 +217,7 @@ const EmployeeTable = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sortedEmployees.length === 0 ? (
+                    {currentEmployees.length === 0 ? (
                         <TableRow>
                             <TableCell></TableCell>
                             <TableCell className="text-center">
@@ -217,7 +226,7 @@ const EmployeeTable = () => {
                             <TableCell></TableCell>
                         </TableRow>
                     ) : (
-                        sortedEmployees.map((employee, idx) => (
+                        currentEmployees.map((employee, idx) => (
                             <TableRow key={idx}>
                                 <TableCell className="font-medium">{employee.name}</TableCell>
                                 <TableCell>{employee.jobTitle}</TableCell>
@@ -236,7 +245,37 @@ const EmployeeTable = () => {
                     )}
                 </TableBody>
             </Table>
-            {/* Display table - End */}
+        {totalPages > 1 && (
+        <Pagination className="mt-4">
+        <PaginationContent>
+        <PaginationItem>
+        <PaginationPrevious
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+        />
+      </PaginationItem>
+
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+        <PaginationItem key={pageNum}>
+          <PaginationLink
+            isActive={currentPage === pageNum}
+            onClick={() => setCurrentPage(pageNum)}
+          >
+            {pageNum}
+          </PaginationLink>
+        </PaginationItem>
+        ))}
+
+        <PaginationItem>
+            <PaginationNext
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+            </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+        )}
+        {/* Display table - End */}
         </>
     )
 }

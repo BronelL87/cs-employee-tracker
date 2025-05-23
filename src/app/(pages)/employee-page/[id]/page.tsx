@@ -3,45 +3,43 @@
 import EmployeeEditView from '@/components/EmployeeEditView';
 import EmployeeView from '@/components/EmployeeView';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAppContext } from '@/lib/context/context'
 import { Employee } from '@/lib/interfaces/interfaces';
 import { getEmployeeById } from '@/lib/services/employee-service';
-import React, { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 const page = () => {
-    const { employeeId } = useAppContext();
+    const params = useParams();
+    const employeeId = Number(params.id);
 
     const [employee, setEmployee] = useState<Employee | null>(null);
     const [token, setToken] = useState('');
-
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
-        const handleToken = async () => {
-            if (localStorage.getItem('user')) {
-                setToken(await JSON.parse(localStorage.getItem('user')!).token);
+        const handleToken = () => {
+            const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+            if (user) {
+                const parsed = JSON.parse(user);
+                setToken(parsed.token);
             }
-            if (sessionStorage.getItem('user')) {
-                setToken(await JSON.parse(sessionStorage.getItem('user')!).token);
-            }
-        }
+        };
 
         handleToken();
     }, []);
 
     useEffect(() => {
-        const getEmployee = async () => {
-            if (token != '') {
+        const fetchEmployee = async () => {
+            if (token && employeeId) {
                 const tempEmployee = await getEmployeeById(token, employeeId);
-                if (tempEmployee)
+                if (tempEmployee) {
                     setEmployee(tempEmployee);
+                }
             }
-        }
+        };
 
-        if (employeeId != 0) {
-            getEmployee();
-        }
-    }, [token, employeeId])
+        fetchEmployee();
+    }, [token, employeeId]);
 
     return (
         <div className="min-h-screen flex flex-col justify-center max-w-3xl mx-auto">
@@ -53,18 +51,16 @@ const page = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-4 text-black">
-                    {
-                        employee && (
-                            isEditing ?
-                                <EmployeeEditView employee={employee} setEdit={setIsEditing} />
-                                :
-                                <EmployeeView employee={employee} setEdit={setIsEditing} />
-                        )
-                    }
+                    {employee && (
+                        isEditing ?
+                            <EmployeeEditView employee={employee} setEdit={setIsEditing} />
+                            :
+                            <EmployeeView employee={employee} setEdit={setIsEditing} />
+                    )}
                 </CardContent>
             </Card>
         </div>
-    )
-}
+    );
+};
 
-export default page
+export default page;
